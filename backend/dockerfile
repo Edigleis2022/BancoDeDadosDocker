@@ -1,0 +1,29 @@
+# Etapa 1 (stage 1): Compilação do projeto com Maven
+FROM maven:3.9-eclipse-temurin-17-alpine AS builder
+
+# Pasta padrão
+WORKDIR /usr/app/temp
+
+# Copiar arquivos do projeto e compilar para gerar o arquivo JAR
+COPY . .
+
+# Instalar dependências e compilar o projeto para gerar o arquivo JAR
+RUN mvn install -DskipTests=true
+RUN mvn clean package -DskipTests=true
+
+
+
+# Etapa 2 (stage 2): Execução do projeto com Java JRE 17
+FROM eclipse-temurin:17-jre-alpine AS production
+
+# Pasta padrão
+WORKDIR /usr/app/backend
+
+# Copiar o arquivo JAR da etapa 1
+COPY --from=builder /usr/app/temp/target/tutorial-backend.jar ./
+
+# Porta padrão
+EXPOSE 8080
+
+# Execução da aplicação
+ENTRYPOINT ["java","-jar","tutorial-backend.jar"]

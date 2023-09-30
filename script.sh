@@ -44,3 +44,52 @@ yarn start
 npm run start
 
 # Endereço: http://localhost:3000
+
+
+
+############### DOCKER ###############
+
+# Network (rede)
+
+# Criar um rede para a aplicação
+docker network create tutorial-network
+
+# Banco de Dados
+docker run --name mariadb --rm \
+-v mariadb-volume:/var/lib/mysql \
+-e MARIADB_ROOT_PASSWORD=123456 \
+-e MARIADB_DATABASE=tutorial \
+-p 3306:3306 -d \
+--network=tutorial-network \
+mariadb:11
+
+# BACKEND
+
+# Compilar a imagem
+docker build -t tutorial-backend .
+docker image list
+
+# Excluir imagens intermediárias
+docker image prune -f
+
+# Criar um container
+docker run --rm --name tutorial-backend1 -d \
+-p 8080:8080 --env-file ./.env \
+--network=tutorial-network \
+tutorial-backend
+
+
+# FRONTEND
+
+# Compilar a imagem
+docker build -t tutorial-frontend .
+docker image list
+
+# Excluir imagens intermediárias
+docker image prune -f
+
+# Criar um container
+docker run --rm --name tutorial-frontend1 -d \
+-p 80:3000 --network=tutorial-network \
+tutorial-frontend
+
